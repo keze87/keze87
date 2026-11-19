@@ -22,34 +22,35 @@ Welcome to my GitHub profile. Below you can find my public cryptographic details
         - The signer is `CN=César Ezequiel Herrera` (`cesar.ezequiel.herrera@gmail.com`).
         - The signing date falls within `2026-11-19` to `2031-11-18`.
         - The **SHA-256 fingerprint** matches `E5:4C:66:A7:D5:C1:67:FE:DE:27:64:53:8B:39:67:11:C6:EC:D1:71:12:27:44:37:58:86:1A:A8:1F:BE:B1:4B`.
-2. **From the command line** (Linux with `poppler-utils` and `openssl`):
-    Set `PDF` to the path of the file you want to verify (`pdfsig -dump` runs inside a temporary directory so existing files in your working directory are untouched):
+2. **From the command line with Python**:
+   Install [`pyHanko`](https://pypi.org/project/pyHanko/):
+
     ```bash
-    PDF="/path/to/document.pdf"
-    EXPECTED_FP="E5:4C:66:A7:D5:C1:67:FE:DE:27:64:53:8B:39:67:11:C6:EC:D1:71:12:27:44:37:58:86:1A:A8:1F:BE:B1:4B"
+    pip install pyHanko
+    ```
 
-    # 1. Verify signature integrity and signer name
-    out=$(LC_ALL=C pdfsig -nocert "$PDF")
-    if grep -q "Signature is Valid." <<<"$out" && grep -q "César Ezequiel Herrera" <<<"$out"; then
-      echo "VALID: Signature is intact and signed by César Ezequiel Herrera"
-    else
-      echo "FAILED: Invalid signature or signer mismatch"
-    fi
+    Then set `PDF_PATH` to your file and run:
 
-    # 2. Verify the embedded certificate's SHA-256 fingerprint
-    PDF_ABS=$(realpath "$PDF")
-    tmp=$(mktemp -d)
-    (
-      cd "$tmp" || exit 1
-      LC_ALL=C pdfsig -dump "$PDF_ABS" >/dev/null
-      if openssl pkcs7 -inform DER -in * -print_certs \
-        | openssl x509 -noout -fingerprint -sha256 \
-        | grep -qi "$EXPECTED_FP"; then
-        echo "VALID: Certificate SHA-256 fingerprint matches"
-      else
-        echo "FAILED: Certificate SHA-256 fingerprint mismatch"
-      fi
-    )
+    ```python
+    import hashlib
+    from pyhanko.pdf_utils.reader import PdfFileReader
+    from pyhanko.sign.validation import validate_pdf_signature
+
+    PDF_PATH = "path/to/document.pdf"
+    EXPECTED_FP = "E5:4C:66:A7:D5:C1:67:FE:DE:27:64:53:8B:39:67:11:C6:EC:D1:71:12:27:44:37:58:86:1A:A8:1F:BE:B1:4B"
+    expected_hex = EXPECTED_FP.replace(":", "").lower()
+
+    with open(PDF_PATH, "rb") as f:
+        reader = PdfFileReader(f)
+        if not reader.embedded_signatures:
+            print("FAILED: No signatures found in the PDF.")
+        for sig in reader.embedded_signatures:
+            status = validate_pdf_signature(sig)
+            fp = hashlib.sha256(status.signing_cert.dump()).hexdigest()
+            if status.intact and status.valid and fp == expected_hex:
+                print(f"VALID ({sig.field_name}): Intact signature matching César Ezequiel Herrera ({EXPECTED_FP})")
+            else:
+                print(f"FAILED ({sig.field_name}): intact={status.intact}, valid={status.valid}, fp={fp}")
     ```
 
 ---
@@ -85,17 +86,22 @@ x2gJ36MD
 
 #### Verification Steps (PGP)
 
-1. **Import the public key** directly from GitHub or by saving the block above to `keze87.asc`:
+1. **Import the public key** directly from GitHub or by saving the block above to `keze87.asc` (requires GnuPG / [Gpg4win](https://www.gpg4win.org/) on Windows):
+
     ```bash
+    # Linux / macOS
     curl -sL https://github.com/keze87.gpg | gpg --import
 
-    # or, from a local file: gpg --import keze87.asc
+    # Windows: curl.exe -sL https://github.com/keze87.gpg | gpg --import
+
+    # Or, from a saved local file:  gpg --import keze87.asc
     ```
+
 2. **Confirm the fingerprint**:
     ```bash
     gpg --fingerprint 26548ABC59B55BC4F492BD967428A10A46691632
     ```
-3. **Verify a signed file or Git commit/tag**:
+3. **Verify a signed file or Git commit/tag** (confirm the output shows `Good signature` and `Primary key fingerprint: 2654 8ABC 59B5 5BC4 F492 BD96 7428 A10A 4669 1632`):
 
     ```bash
     # Detached signature
