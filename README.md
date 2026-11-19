@@ -22,15 +22,35 @@ Welcome to my GitHub profile. Below you can find my public cryptographic details
         - The signer is `CN=César Ezequiel Herrera` (`cesar.ezequiel.herrera@gmail.com`).
         - The signing date falls within `2026-11-19` to `2031-11-18`.
         - The **SHA-256 fingerprint** matches `E5:4C:66:A7:D5:C1:67:FE:DE:27:64:53:8B:39:67:11:C6:EC:D1:71:12:27:44:37:58:86:1A:A8:1F:BE:B1:4B`.
-2. **From the command line** (Linux with `poppler-utils` / `openssl`):
-    - Verify the signature is valid and matches my signer info:
-      ```bash
-      out=$(LC_ALL=C pdfsig -nocert document.pdf) && grep -q "Signature is Valid." <<<"$out" && grep -q "César Ezequiel Herrera" <<<"$out" && echo "VALID: Signature is intact and signed by César Ezequiel Herrera" || echo "FAILED: Invalid signature or signer mismatch"
-      ```
-    - Verify the embedded certificate's exact SHA-256 fingerprint:
-      ```bash
-      (d=$(mktemp -d) && LC_ALL=C pdfsig -dump document.pdf >/dev/null && mv *.sig* "$d/" && openssl pkcs7 -inform DER -in "$d"/* -print_certs | openssl x509 -noout -fingerprint -sha256 | grep -qi "E5:4C:66:A7:D5:C1:67:FE:DE:27:64:53:8B:39:67:11:C6:EC:D1:71:12:27:44:37:58:86:1A:A8:1F:BE:B1:4B" && echo "VALID: Certificate SHA-256 fingerprint matches" || echo "FAILED: Certificate SHA-256 fingerprint mismatch"; rm -rf "$d")
-      ```
+2. **From the command line** (Linux with `poppler-utils` and `openssl`):
+    Set `PDF` to the path of the file you want to verify (`pdfsig -dump` runs inside a temporary directory so existing files in your working directory are untouched):
+    ```bash
+    PDF="/path/to/document.pdf"
+    EXPECTED_FP="E5:4C:66:A7:D5:C1:67:FE:DE:27:64:53:8B:39:67:11:C6:EC:D1:71:12:27:44:37:58:86:1A:A8:1F:BE:B1:4B"
+
+    # 1. Verify signature integrity and signer name
+    out=$(LC_ALL=C pdfsig -nocert "$PDF")
+    if grep -q "Signature is Valid." <<<"$out" && grep -q "César Ezequiel Herrera" <<<"$out"; then
+      echo "VALID: Signature is intact and signed by César Ezequiel Herrera"
+    else
+      echo "FAILED: Invalid signature or signer mismatch"
+    fi
+
+    # 2. Verify the embedded certificate's SHA-256 fingerprint
+    PDF_ABS=$(realpath "$PDF")
+    tmp=$(mktemp -d)
+    (
+      cd "$tmp" || exit 1
+      LC_ALL=C pdfsig -dump "$PDF_ABS" >/dev/null
+      if openssl pkcs7 -inform DER -in * -print_certs \
+        | openssl x509 -noout -fingerprint -sha256 \
+        | grep -qi "$EXPECTED_FP"; then
+        echo "VALID: Certificate SHA-256 fingerprint matches"
+      else
+        echo "FAILED: Certificate SHA-256 fingerprint mismatch"
+      fi
+    )
+    ```
 
 ---
 
