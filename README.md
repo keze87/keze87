@@ -1,6 +1,6 @@
 ## Hi there 👋
 
-I'm **César Ezequiel Herrera** (`keze87`).
+I'm **César Ezequiel Herrera**.
 
 Welcome to my GitHub profile. Below you can find my public cryptographic details and instructions on how to verify my digital signatures for documents, files, and Git commits.
 
@@ -10,7 +10,7 @@ Welcome to my GitHub profile. Below you can find my public cryptographic details
 
 ### PDF Signing Certificate
 
-- **Signer:** `CN=César Ezequiel Herrera` (`cesar.ezequiel.herrera@gmail.com`)
+- **Signer:** `CN=César Ezequiel Herrera`
 - **Valid:** `2026-11-19` to `2031-11-18`
 - **SHA-256 Fingerprint:** `E5:4C:66:A7:D5:C1:67:FE:DE:27:64:53:8B:39:67:11:C6:EC:D1:71:12:27:44:37:58:86:1A:A8:1F:BE:B1:4B`
 
@@ -19,7 +19,7 @@ Welcome to my GitHub profile. Below you can find my public cryptographic details
 1. **In a PDF reader** (such as Adobe Acrobat Reader, Okular, or LibreOffice):
     - Open the **Signatures** / **Signature Panel** view.
     - Inspect the certificate details and verify that:
-        - The signer is `CN=César Ezequiel Herrera` (`cesar.ezequiel.herrera@gmail.com`).
+        - The signer is `CN=César Ezequiel Herrera`.
         - The signing date falls within `2026-11-19` to `2031-11-18`.
         - The **SHA-256 fingerprint** matches `E5:4C:66:A7:D5:C1:67:FE:DE:27:64:53:8B:39:67:11:C6:EC:D1:71:12:27:44:37:58:86:1A:A8:1F:BE:B1:4B`.
 2. **From the command line with Python**:
@@ -57,7 +57,6 @@ Welcome to my GitHub profile. Below you can find my public cryptographic details
 
 ### PGP Public Key
 
-- **User ID:** `Cesar Ezequiel Herrera <cesar.ezequiel.herrera@gmail.com>`
 - **Fingerprint:** `2654 8ABC 59B5 5BC4 F492 BD96 7428 A10A 4669 1632`
 - **Algorithm:** `ed25519` (signing) / `cv25519` (encryption)
 - **Public Key URL:** <https://github.com/keze87.gpg>
